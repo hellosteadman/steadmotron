@@ -1,38 +1,38 @@
 const dirVerbs = ['go', 'go to', 'head', 'walk', 'walk to']
 const getExitNames = (passage) => {
-    let returned = []
+  let returned = []
 
-    Object.keys(passage.exits).forEach(
-        (key) => {
-            returned.push(key)
-            returned.push(key.replace(' ', '-'))
-            returned.push(key.replace(' ', ''))
-        }
-    )
+  Object.keys(passage.exits).forEach(
+    (key) => {
+      returned.push(key)
+      returned.push(key.replace(' ', '-'))
+      returned.push(key.replace(' ', ''))
+    }
+  )
 
-    return returned
+  return returned
 }
 
 module.exports = (action, passage, game) => {
-    const match = () => {
-        const exitNames = getExitNames(passage)
-        const ex = new RegExp('^(?:' + dirVerbs.join('|') + ') ?(' + exitNames.join('|') + ')')
-        const matches = action.match(ex)
+  const match = () => {
+    const exitNames = getExitNames(passage)
+    const ex = new RegExp('^(?:' + dirVerbs.join('|') + ') ?(' + exitNames.join('|') + ')')
+    const matches = action.match(ex)
 
-        if (matches && matches.length) {
-            const direction = matches[1]
+    if (matches && matches.length) {
+      const direction = matches[1]
 
-            if (passage.exits[direction]) {
-                return passage.exits[direction]
-            }
-        }
-
-        return null
+      if (passage.exits[direction]) {
+        return passage.exits[direction]
+      }
     }
 
-    const matched = match()
+    return null
+  }
 
-    if (matched !== null) {
-        return () => matched(game, passage)
-    }
+  const matched = match()
+
+  if (matched !== null) {
+    return () => matched(game, passage)
+  }
 }
