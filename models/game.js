@@ -2,7 +2,7 @@ const EventEmitter = require('eventemitter3')
 const CLI = require('../ui/cli')
 
 class Game extends EventEmitter {
-    constructor({passage, callbacks}) {
+    constructor({title, passage, callbacks}) {
         let flags = {}
         let ui = null
         let score = 0
@@ -13,6 +13,7 @@ class Game extends EventEmitter {
         let timerFuncs = {}
 
         super()
+        this.title = title
 
         if (typeof (callbacks) !== 'undefined') {
             if (typeof (callbacks) === 'object' && !Array.isArray(callbacks)) {
