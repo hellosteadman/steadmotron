@@ -1,5 +1,3 @@
-const readline = require('readline')
-
 class CLI {
   start(game) {
     process.on(
@@ -55,6 +53,7 @@ class CLI {
           )
         }
 
+        const readline = require('readline')
         const ask = () => {
           this.prompter = readline.createInterface(
             {
