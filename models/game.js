@@ -1,5 +1,4 @@
 const EventEmitter = require('eventemitter3')
-const CLI = require('../ui/cli')
 
 class Game extends EventEmitter {
     constructor({title, passage, callbacks}) {
@@ -63,14 +62,8 @@ class Game extends EventEmitter {
         }
 
         this.play = async (uiName, script, playAuto) => {
-            switch (uiName) {
-                case 'cli':
-                    ui = new CLI(this)
-                    break
-
-                default:
-                    throw new Error(`Unknown user-interface: ${uiName}`)
-            }
+            const CLI = require(`../ui/${uiName}`)
+            ui = new CLI(this)
 
             if (typeof (script) !== 'undefined') {
                 skipLines = script
