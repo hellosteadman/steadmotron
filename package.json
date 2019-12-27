@@ -1,0 +1,11 @@
+{
+  "name": "steadmotron",
+  "version": "1.0.0",
+  "description": "A text adventure engine",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "eventemitter3": "^4.0.0"
+  }
+}
