@@ -32,6 +32,8 @@ class Browser {
         if (this.prompter) {
           this.prompter.close();
         }
+
+        window.close()
       }
     }
 
