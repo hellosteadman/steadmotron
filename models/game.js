@@ -87,6 +87,13 @@ class Game extends EventEmitter {
       await this.emit('restarting', this)
       flags = {}
       score = 0
+
+      while (Object.keys(timers).length) {
+        this.clearTimer(
+          Object.keys(timers)[0]
+        )
+      }
+
       await this.emit('reset', this)
       await ui.clear()
 
@@ -258,11 +265,10 @@ class Game extends EventEmitter {
         const go = () => {
           delete timers[name]
           delete timerFuncs[name]
-          // console.debug('Timer', name, 'elapsed')
+
           resolve()
         }
 
-        // console.debug('Set a timer for', seconds, 'second(s)')
         timers[name] = setTimeout(go, seconds * 1000)
         timerFuncs[name] = go
       }
@@ -273,7 +279,6 @@ class Game extends EventEmitter {
       const timerFunc = timerFuncs[name]
 
       if (typeof (timer) !== 'undefined') {
-        // console.debug('Timer', name, 'cleared')
         clearTimeout(timer)
         delete timers[name]
       }
