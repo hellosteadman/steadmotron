@@ -3,6 +3,10 @@ const EventEmitter = require('eventemitter3')
 class Interface extends EventEmitter {
   constructor(dom) {
     super()
+
+    dom.addEventListener('mousedown', e => e.preventDefault())
+    dom.addEventListener('contextmenu', e => e.preventDefault())
+
     this.question = (question, callback) => {
       const prompt = document.createElement('span')
       const input = document.createElement('input')
@@ -31,6 +35,7 @@ class Interface extends EventEmitter {
         }
       )
 
+      dom.addEventListener('mousedown', () => input.focus())
       this.on('close',
         () => {
           const span = document.createElement('span')
