@@ -256,6 +256,10 @@ class Game extends EventEmitter {
       (key) => func(inventory[key], key)
     )
 
+    this.getScore = () => {
+      return score
+    }
+
     this.timer = (seconds, name) => new Promise(
       (resolve) => {
         if (typeof (name) === 'undefined') {
