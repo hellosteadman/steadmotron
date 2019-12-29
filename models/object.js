@@ -2,11 +2,12 @@ const EventEmitter = require('eventemitter3')
 const CLI = require('../ui/cli')
 
 class GameObject extends EventEmitter {
-  constructor({name, alternates, description, verbs, take, plural, points, callbacks}) {
+  constructor({name, plural_name, alternates, description, dropped, verbs, take, plural, multiple, points, callbacks}) {
     let flags = {}
     super()
 
     this.name = name
+    this.plural_name = plural_name
     this.get = key => flags[key]
     this.set = async (key, value) => {
       if (value !== flags[key]) {
@@ -22,7 +23,15 @@ class GameObject extends EventEmitter {
 
     this.alternates = alternates
     this.description = description
+
+    if (typeof (dropped) !== 'undefined') {
+      this.dropped = dropped
+    } else {
+      this.dropped = `You drop the ${name}.`
+    }
+
     this.plural = plural === true
+    this.multiple = multiple
     this.points = isNaN(points) ? 0 : points
     this.verbs = {
       '^(?:look|examine)': (game, passage) => {
@@ -117,6 +126,14 @@ class GameObject extends EventEmitter {
 
     this.discard = async (game, passage, noun) => {
       if (await game.discard(noun, this)) {
+        passage.objects[noun] = this
+        await this.emit('discarded', game, passage, this)
+        await passage.emit(noun + '.discarded', game, passage)
+      }
+    }
+
+    this.discardSilently = async (game, passage, noun) => {
+      if (await game.discardSilently(noun, this)) {
         passage.objects[noun] = this
         await this.emit('discarded', game, passage, this)
         await passage.emit(noun + '.discarded', game, passage)

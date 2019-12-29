@@ -182,21 +182,49 @@ class Game extends EventEmitter {
       }
 
       const name = obj.name || noun
+      let pronoun = 'the'
 
-      if (inventory[noun]) {
+      if (obj.multiple) {
+        if (typeof (inventory[noun]) === 'undefined') {
+          inventory[noun] = []
+
+          if (name.match('^[aeiou]')) {
+            pronoun = 'an'
+          } else {
+            pronoun = 'a'
+          }
+        } else {
+          pronoun = 'another'
+        }
+
+        inventory[noun].push(obj)
+      } else if (inventory[noun]) {
         this.say(`You already have the ${name}.`)
         return false
+      } else {
+        inventory[noun] = obj
       }
 
-      inventory[noun] = obj
       this.plus(obj.points)
-      this.say(`You take the ${name}.`)
+      this.say(`You take ${pronoun} ${name}.`)
       return true
     }
 
-    this.discard = async (noun, obj) => {
+    const discard = async (noun, obj, quietly) => {
+      if (typeof (quietly) === 'undefined') {
+        quietly = false
+      }
+
       if (typeof (noun) === 'undefined') {
         throw new Error('Undefined noun')
+      }
+
+      if (typeof (obj) === 'undefined') {
+        if (Array.isArray(inventory[noun]) && inventory[noun].length) {
+          obj = inventory[noun][0]
+        } else {
+          throw new Error('Undefined object', noun)
+        }
       }
 
       let name = obj.name || noun
@@ -215,13 +243,49 @@ class Game extends EventEmitter {
         return false
       }
 
+      if (Array.isArray(inventory[noun])) {
+        if (inventory[noun].length) {
+          name = inventory[noun][0].name
+          this.minus(obj.points)
+
+          if (!quietly) {
+            this.say(obj.dropped)
+          }
+
+          inventory[noun].pop()
+
+          return true
+        } else {
+          name = obj.plural_name || obj.name
+          this.say(`You don't have any more ${name}.`)
+          return false
+        }
+      }
+
       delete inventory[noun]
       this.minus(obj.points)
-      this.say(`You drop the ${name}.`)
+
+      if (!quietly) {
+        this.say(obj.dropped)
+      }
+
       return true
     }
 
-    this.has = noun => typeof (inventory[noun]) !== 'undefined'
+    this.discard = async (noun, obj) => await discard(noun, obj, false)
+    this.discardSilently = async (noun, obj) => await discard(noun, obj, true)
+
+    this.has = noun => {
+      if (typeof (inventory[noun]) !== 'undefined') {
+        if (Array.isArray(inventory[noun])) {
+          return inventory[noun].length > 0
+        }
+
+        return true
+      }
+
+      return false
+    }
 
     this.showInventory = () => {
       if (!Object.keys(inventory).length) {
@@ -229,23 +293,47 @@ class Game extends EventEmitter {
         return
       }
 
-      let text = 'You have:\n'
+      let text = 'You have:'
+      let itemDescriptions = []
 
       Object.keys(inventory).forEach(
         (noun) => {
           const obj = inventory[noun]
-          const plural = obj.plural === true
-          let name = obj.name || noun
+          let name = null
 
-          if (plural) {
-            name = `some ${name}`
-          } else if (name.match('^[aeiou]')) {
-            name = `an ${name}`
+          if (Array.isArray(obj)) {
+            if (obj.length > 1) {
+              name = obj[0].plural_name || obj[0].name
+              itemDescriptions.push(`${obj.length} ${name}`)
+            } else if (obj.length === 1) {
+              name = obj[0].name
+
+              if (name.match('^[aeiou]')) {
+                itemDescriptions.push(`an ${name}`)
+              } else {
+                itemDescriptions.push(`a ${name}`)
+              }
+            } else {
+              return
+            }
           } else {
-            name = `a ${name}`
-          }
+            let plural = obj.plural === true
+            let name = obj.name || noun
 
-          text += `  - ${name}\n`
+            if (plural) {
+              itemDescriptions.push(`some ${name}`)
+            } else if (name.match('^[aeiou]')) {
+              itemDescriptions.push(`an ${name}`)
+            } else {
+              itemDescriptions.push(`a ${name}`)
+            }
+          }
+        }
+      )
+
+      itemDescriptions.forEach(
+        (t) => {
+          text += `\n    - ${t}`
         }
       )
 
@@ -253,7 +341,17 @@ class Game extends EventEmitter {
     }
 
     this.withInventory = (func) => Object.keys(inventory).forEach(
-      (key) => func(inventory[key], key)
+      (key) => {
+        const obj = inventory[key]
+
+        if (Array.isArray(obj)) {
+          if (obj.length) {
+            func(obj[0], key)
+          }
+        } else {
+          func(obj, key)
+        }
+      }
     )
 
     this.getScore = () => {
