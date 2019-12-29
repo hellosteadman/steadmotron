@@ -137,7 +137,7 @@ class Game extends EventEmitter {
 
         try {
           line = skipLines.shift()
-          matches = line.match(/^wait ([a-z0-9_]+)$/)
+          matches = line.match(/^wait ([a-z0-9_\.]+)$/)
 
           if (matches) {
             timerName = matches[1]
