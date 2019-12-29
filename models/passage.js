@@ -4,6 +4,7 @@ const parsers = [
   require('../parsers/action'),
   require('../parsers/object'),
   require('../parsers/inventory'),
+  require('../parsers/score'),
   require('../parsers/quit')
 ]
 
