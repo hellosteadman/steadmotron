@@ -29,7 +29,6 @@ class Passage extends EventEmitter {
     }
 
     this.actions = {
-      'inventory': game => game.showInventory(),
       '(?:look(?: around)?|examine)$': game => this.describe(game)
     }
 

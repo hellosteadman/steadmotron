@@ -1,6 +1,10 @@
 module.exports = (action, passage, game) => {
   let returned = null
 
+  if (action === 'inventory') {
+    return game.showInventory
+  }
+
   game.withInventory(
     (obj, key) => {
       const ex = new RegExp('^(.+) ' + key + '$')
