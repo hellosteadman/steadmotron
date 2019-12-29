@@ -26,7 +26,7 @@ class GameObject extends EventEmitter {
     this.points = isNaN(points) ? 0 : points
     this.verbs = {
       '^(?:look|examine)': (game, passage) => {
-        this.describe(game)
+        this.describe(game, passage)
         this.emit('examined', game, passage, this)
       }
     }
@@ -95,9 +95,13 @@ class GameObject extends EventEmitter {
       }
     }
 
-    this.describe = (game) => {
+    this.describe = (game, passage) => {
       if (this.description) {
-        game.say(this.description)
+        if (typeof (this.description) === 'function') {
+          game.say(this.description(game, passage))
+        } else {
+          game.say(this.description)
+        }
       } else {
         game.say('It\'s just this thing, you know?')
       }
