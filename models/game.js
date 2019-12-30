@@ -111,6 +111,7 @@ class Game extends EventEmitter {
       }
 
       this.passage = p
+      await p.emit('entering', this)
 
       const response = await ui.show(p)
       await p.emit('entered', this)
