@@ -177,7 +177,11 @@ class Game extends EventEmitter {
       }
     }
 
-    this.take = async (noun, obj) => {
+    const take = async (noun, obj, quietly) => {
+      if (typeof (quietly) === 'undefined') {
+        quietly = false
+      }
+
       if (typeof (noun) === 'undefined') {
         throw new Error('Undefined noun')
       }
@@ -207,9 +211,16 @@ class Game extends EventEmitter {
       }
 
       this.plus(obj.points)
-      this.say(`You take ${pronoun} ${name}.`)
+
+      if (!quietly) {
+        this.say(`You take ${pronoun} ${name}.`)
+      }
+
       return true
     }
+
+    this.take = async (noun, obj) => await take(noun, obj, false)
+    this.takeSilently = async (noun, obj) => await take(noun, obj, true)
 
     const discard = async (noun, obj, quietly) => {
       if (typeof (quietly) === 'undefined') {
@@ -224,7 +235,11 @@ class Game extends EventEmitter {
         if (Array.isArray(inventory[noun]) && inventory[noun].length) {
           obj = inventory[noun][0]
         } else {
-          throw new Error('Undefined object', noun)
+          obj = inventory[noun]
+
+          if (typeof (obj) === 'undefined') {
+            throw new Error('Undefined object', noun)
+          }
         }
       }
 
