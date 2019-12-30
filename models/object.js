@@ -170,6 +170,8 @@ class GameObject extends EventEmitter {
       if (matchedVerb) {
         return await matchedVerb.func(game, passage, this, noun)
       }
+
+      return null
     }
   }
 }
