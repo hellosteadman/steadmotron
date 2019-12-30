@@ -130,6 +130,29 @@ class Game extends EventEmitter {
       await this.restart()
     }
 
+    this.end = async (p) => {
+      if (this.passage) {
+        await this.passage.emit('exited', this)
+      }
+
+      this.passage = p
+      this.ended = true
+
+      while (Object.keys(timers).length) {
+        this.clearTimer(
+          Object.keys(timers).pop()
+        )
+      }
+
+      await ui.show(this.passage)
+      await this.passage.emit('entered', this)
+
+      await ui.say(
+        `Thank you for playing ${title}. ` +
+        'You scored ' + score + ' point' + (score != 1 ? 's' : '') + '.\n'
+      )
+    }
+
     this.prompt = async () => {
       if (skipLines.length) {
         let line = ''
@@ -445,7 +468,9 @@ class Game extends EventEmitter {
           }
         }
 
-        await this.emit('ready')
+        if (!this.ended) {
+          await this.emit('ready')
+        }
       }
     )
 
